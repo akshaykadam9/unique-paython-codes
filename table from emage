@@ -1,0 +1,43 @@
+#BY THIS PYTHON CODE WE CAN EXTRACT A TABLE FROM IMAGES 
+
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+file_path = 'C:/Users/hp/Downloads/WhatsApp Image 2023-03-05 at 2.09.53 PM.jpeg'
+
+# Read the image
+im = cv2.imread(file_path)
+
+# Convert to grayscale
+im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+
+# Apply binary threshold
+ret, thresh_value = cv2.threshold(im_gray, 180, 255, cv2.THRESH_BINARY_INV)
+
+# Dilate the thresholded image
+kernel = np.ones((5, 5), np.uint8)
+dilated_value = cv2.dilate(thresh_value, kernel, iterations=1)
+
+# Find contours
+contours, hierarchy = cv2.findContours(dilated_value, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+# Extract bounding box coordinates
+coordinates = []
+for cnt in contours:
+    x, y, w, h = cv2.boundingRect(cnt)
+    coordinates.append((x, y, w, h))
+    # Draw a rectangle around the contour if it is located near the top of the image
+    if y < 50:
+        cv2.rectangle(im, (x, y), (x+w, y+h), (0, 0, 255), 1)
+
+# Display the image with bounding boxes
+plt.imshow(im)
+plt.show()
+
+# Save the image with bounding boxes
+cv2.imwrite('detecttable.jpg', im)
+cv2.namedWindow('detecttable', cv2.WINDOW_NORMAL)
+cv2.imshow('detecttable', im)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
